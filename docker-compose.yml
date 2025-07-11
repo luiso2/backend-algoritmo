@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: algoritmo-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: algoritmo
+      POSTGRES_PASSWORD: algoritmo123
+      POSTGRES_DB: algoritmo_finanzas
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - algoritmo-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: algoritmo-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass algoritmo123
+    volumes:
+      - redis_data:/data
+    networks:
+      - algoritmo-network
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: algoritmo-pgadmin
+    restart: unless-stopped
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@algoritmo.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - algoritmo-network
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
+  redis_data:
+  pgadmin_data:
+
+networks:
+  algoritmo-network:
+    driver: bridge

@@ -1,0 +1,87 @@
+# Development files
+.env
+.env.local
+.env.development
+*.bat
+*.sh
+!setup.sh
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Tests
+test/
+tests/
+*.spec.ts
+*.test.ts
+coverage/
+
+# Local scripts
+scripts/
+check-*.js
+rename-*.js
+update-*.js
+fix-*.bat
+inicio-*.bat
+start-*.bat
+verify-*.bat
+run-*.bat
+menu.bat
+
+# Development configs
+.eslintrc.js
+.prettierrc
+docker-compose.yml
+docker-compose.*.yml
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# CI
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Build artifacts that Railway will generate
+dist/
+build/
+
+# Optional dependencies
+*.optional
+
+# Vercel specific (not needed for Railway)
+.vercel/
+vercel.json
+api/
+.vercelignore
+
+# Solution files (specific to this project)
+SOLUCION-*.md
+EJECUTAR-*.md
+EJECUTAR-*.txt
+PRISMA-*.md
+RESUMEN-*.md
+DIRECTUS-*.md

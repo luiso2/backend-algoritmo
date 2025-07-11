@@ -1,0 +1,140 @@
+// This is your Prisma schema file - Using existing table names
+// This version uses the existing table names without app_ prefix
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User and Authentication Models
+model User {
+  id              String    @id @default(uuid())
+  email           String    @unique
+  password        String
+  firstName       String
+  lastName        String
+  avatarUrl       String?
+  phone           String?
+  isActive        Boolean   @default(true)
+  isEmailVerified Boolean   @default(false)
+  lastLoginAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  accounts        Account[]
+  creditCards     CreditCard[]
+  transactions    Transaction[]
+  bills           Bill[]
+  contracts       Contract[]
+  tags            Tag[]
+  goals           Goal[]
+  reminders       Reminder[]
+  notifications   Notification[]
+  aiInteractions  AIInteraction[]
+  refreshTokens   RefreshToken[]
+  subscriptions   Subscription[]
+  fileUploads     FileUpload[]
+}
+
+model RefreshToken {
+  id          String   @id @default(uuid())
+  userId      String
+  token       String   @unique
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  
+  // Relations
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([token])
+}
+
+// Financial Account Models
+model Account {
+  id              String    @id @default(uuid())
+  userId          String
+  name            String
+  type            AccountType
+  currency        String    @default("BRL")
+  balance         Decimal   @db.Decimal(15, 2)
+  initialBalance  Decimal   @db.Decimal(15, 2)
+  color           String?
+  icon            String?
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions    Transaction[]
+  
+  @@index([userId])
+}
+
+model CreditCard {
+  id              String    @id @default(uuid())
+  userId          String
+  name            String
+  last4Digits     String
+  brand           String
+  creditLimit     Decimal   @db.Decimal(15, 2)
+  availableLimit  Decimal   @db.Decimal(15, 2)
+  closingDay      Int
+  dueDay          Int
+  color           String?
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions    Transaction[]
+  reminders       Reminder[]
+  
+  @@index([userId])
+}
+
+// Transaction Models
+model Transaction {
+  id              String    @id @default(uuid())
+  userId          String
+  accountId       String?
+  creditCardId    String?
+  amount          Decimal   @db.Decimal(15, 2)
+  type            TransactionType
+  category        String
+  subcategory     String?
+  description     String
+  date            DateTime
+  paymentMethod   PaymentMethod
+  isRecurring     Boolean   @default(false)
+  recurringId     String?
+  tags            String[]
+  attachments     String[]
+  notes           String?
+  isDeleted       Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account         Account?    @relation(fields: [accountId], references: [id])
+  creditCard      CreditCard? @relation(fields: [creditCardId], references: [id])
+  bill            Bill?       @relation(fields: [billId], references: [id])
+  billId          String?
+  
+  @@index([userId])
+  @@index([accountId])
+  @@index([creditCardId])
+  @@index([date])
+  @@index([type])
+}
+
+// Continue with all other models...
+// (keeping same structure but without @@map directives)

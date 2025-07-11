@@ -1,0 +1,572 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String            @id @default(uuid())
+  email           String            @unique
+  password        String
+  firstName       String
+  lastName        String
+  avatarUrl       String?
+  avatar          String?
+  phone           String?
+  language        String            @default("es")
+  currency        String            @default("USD")
+  isActive        Boolean           @default(true)
+  isEmailVerified Boolean           @default(false)
+  lastLoginAt     DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  accounts        Account[]
+  aiInteractions  AIInteraction[]
+  bills           Bill[]
+  contracts       Contract[]
+  creditCards     CreditCard[]
+  fileUploads     FileUpload[]
+  goals           Goal[]
+  notifications   Notification[]
+  refreshTokens   RefreshToken[]
+  reminders       Reminder[]
+  subscriptions   Subscription[]
+  tags            Tag[]
+  transactions    Transaction[]
+  achievements    UserAchievement[]
+  roles           UserRole[]
+  settings        UserSettings?
+
+  @@map("app_users")
+}
+
+model UserSettings {
+  id                   String        @id @default(uuid())
+  userId               String        @unique
+  monthlyIncome        Decimal       @default(0) @db.Decimal(15, 2)
+  currency             String        @default("USD")
+  language             String        @default("es")
+  emailAlerts          Boolean       @default(true)
+  smsAlerts            Boolean       @default(false)
+  pushAlerts           Boolean       @default(true)
+  defaultPaymentMethod PaymentMethod @default(CASH)
+  timezone             String        @default("America/Bogota")
+  currentLevel         Int           @default(1)
+  totalPoints          Int           @default(0)
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  user                 User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("app_user_settings")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@map("app_refresh_tokens")
+}
+
+model Role {
+  id          String           @id @default(uuid())
+  name        String           @unique
+  description String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  permissions RolePermission[]
+  users       UserRole[]
+
+  @@map("app_roles")
+}
+
+model Permission {
+  id          String           @id @default(uuid())
+  name        String           @unique
+  resource    String
+  action      String
+  description String?
+  createdAt   DateTime         @default(now())
+  roles       RolePermission[]
+
+  @@map("app_permissions")
+}
+
+model UserRole {
+  id        String   @id @default(uuid())
+  userId    String
+  roleId    String
+  createdAt DateTime @default(now())
+  role      Role     @relation(fields: [roleId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId])
+  @@map("app_user_roles")
+}
+
+model RolePermission {
+  id           String     @id @default(uuid())
+  roleId       String
+  permissionId String
+  createdAt    DateTime   @default(now())
+  permission   Permission @relation(fields: [permissionId], references: [id])
+  role         Role       @relation(fields: [roleId], references: [id])
+
+  @@unique([roleId, permissionId])
+  @@map("app_role_permissions")
+}
+
+model Account {
+  id             String        @id @default(uuid())
+  userId         String
+  name           String
+  type           AccountType
+  currency       String        @default("USD")
+  balance        Decimal       @db.Decimal(15, 2)
+  initialBalance Decimal       @db.Decimal(15, 2)
+  bankName       String?
+  accountNumber  String?
+  color          String?
+  icon           String?
+  isActive       Boolean       @default(true)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions   Transaction[]
+
+  @@index([userId])
+  @@map("app_accounts")
+}
+
+model CreditCard {
+  id                String        @id @default(uuid())
+  userId            String
+  name              String
+  last4Digits       String
+  lastFourDigits    String?
+  brand             String
+  bank              String?
+  creditLimit       Decimal       @db.Decimal(15, 2)
+  availableLimit    Decimal       @db.Decimal(15, 2)
+  balance           Decimal       @default(0) @db.Decimal(15, 2)
+  minimumPayment    Decimal       @default(0) @db.Decimal(15, 2)
+  closingDay        Int
+  dueDay            Int
+  closingDate       Int?
+  dueDate           Int?
+  reminderClosing   Boolean       @default(false)
+  reminderPayment   Boolean       @default(false)
+  daysBeforeClosing Int           @default(3)
+  daysBeforePayment Int           @default(3)
+  color             String?
+  isActive          Boolean       @default(true)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  user              User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reminders         Reminder[]
+  transactions      Transaction[]
+
+  @@index([userId])
+  @@map("app_credit_cards")
+}
+
+model Bill {
+  id                 String              @id @default(uuid())
+  userId             String
+  name               String
+  title              String?
+  company            String?
+  description        String?
+  amount             Decimal             @db.Decimal(15, 2)
+  currency           String              @default("USD")
+  dueDate            DateTime
+  reminderDate       DateTime?
+  category           String
+  priority           Priority            @default(MEDIUM)
+  isRecurring        Boolean             @default(false)
+  recurringFrequency RecurringFrequency?
+  status             BillStatus          @default(PENDING)
+  paidAt             DateTime?
+  notificationEmail  Boolean             @default(true)
+  notificationPush   Boolean             @default(true)
+  notificationSms    Boolean             @default(false)
+  attachments        String[]
+  notes              String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reminders          Reminder[]
+  transactions       Transaction[]
+
+  @@index([userId])
+  @@index([dueDate])
+  @@index([status])
+  @@map("app_bills")
+}
+
+model Transaction {
+  id            String          @id @default(uuid())
+  userId        String
+  accountId     String?
+  creditCardId  String?
+  billId        String?
+  amount        Decimal         @db.Decimal(15, 2)
+  currency      String          @default("USD")
+  type          TransactionType
+  category      String
+  subcategory   String?
+  description   String
+  date          DateTime        @default(now())
+  paymentMethod PaymentMethod
+  isRecurring   Boolean         @default(false)
+  recurringId   String?
+  tags          String[]
+  attachments   String[]
+  notes         String?
+  isDeleted     Boolean         @default(false)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  account       Account?        @relation(fields: [accountId], references: [id])
+  bill          Bill?           @relation(fields: [billId], references: [id])
+  creditCard    CreditCard?     @relation(fields: [creditCardId], references: [id])
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([accountId])
+  @@index([creditCardId])
+  @@index([date])
+  @@index([type])
+  @@map("app_transactions")
+}
+
+model Contract {
+  id          String             @id @default(uuid())
+  userId      String
+  title       String
+  description String?
+  difficulty  ContractDifficulty
+  status      ContractStatus     @default(DRAFT)
+  startDate   DateTime
+  endDate     DateTime?
+  value       Decimal?           @db.Decimal(15, 2)
+  currency    String             @default("USD")
+  parties     Json
+  clauses     Json
+  attachments String[]
+  aiGenerated Boolean            @default(false)
+  templateId  String?
+  metadata    Json?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reminders   Reminder[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("app_contracts")
+}
+
+model ContractTemplate {
+  id            String             @id @default(uuid())
+  name          String
+  category      String
+  description   String?
+  content       String
+  variables     String[]
+  featured      Boolean            @default(false)
+  difficulty    ContractDifficulty
+  estimatedTime String?
+  isActive      Boolean            @default(true)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  @@map("app_contract_templates")
+}
+
+model Tag {
+  id          String   @id @default(uuid())
+  userId      String
+  name        String
+  color       String
+  icon        String?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, name])
+  @@index([userId])
+  @@map("app_tags")
+}
+
+model Goal {
+  id            String     @id @default(uuid())
+  userId        String
+  name          String
+  description   String?
+  targetAmount  Decimal    @db.Decimal(15, 2)
+  currentAmount Decimal    @default(0) @db.Decimal(15, 2)
+  targetDate    DateTime
+  category      String
+  status        GoalStatus @default(ACTIVE)
+  color         String?
+  icon          String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reminders     Reminder[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("app_goals")
+}
+
+model Reminder {
+  id               String       @id @default(uuid())
+  userId           String
+  title            String
+  description      String?
+  type             ReminderType
+  date             DateTime     @default(now())
+  dueDate          DateTime
+  isCompleted      Boolean      @default(false)
+  completedAt      DateTime?
+  creditCardId     String?
+  cardId           String?
+  billId           String?
+  contractId       String?
+  goalId           String?
+  amount           Decimal?     @db.Decimal(15, 2)
+  metadata         Json?
+  notificationSent Boolean      @default(false)
+  sentAt           DateTime?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  bill             Bill?        @relation(fields: [billId], references: [id])
+  contract         Contract?    @relation(fields: [contractId], references: [id])
+  creditCard       CreditCard?  @relation(fields: [creditCardId], references: [id])
+  goal             Goal?        @relation(fields: [goalId], references: [id])
+  user             User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([dueDate])
+  @@index([type])
+  @@map("app_reminders")
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  title     String
+  message   String
+  type      NotificationType
+  isRead    Boolean          @default(false)
+  read      Boolean?         @default(false)
+  readAt    DateTime?
+  metadata  Json?
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@map("app_notifications")
+}
+
+model AIInteraction {
+  id        String   @id @default(uuid())
+  userId    String
+  prompt    String
+  response  String
+  context   Json?
+  model     String
+  tokens    Int
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("app_ai_interactions")
+}
+
+model Achievement {
+  id          String            @id @default(uuid())
+  name        String            @unique
+  description String
+  icon        String
+  points      Int
+  category    String
+  condition   Json
+  createdAt   DateTime          @default(now())
+  users       UserAchievement[]
+
+  @@map("app_achievements")
+}
+
+model UserAchievement {
+  id            String      @id @default(uuid())
+  userId        String
+  achievementId String
+  unlockedAt    DateTime    @default(now())
+  achievement   Achievement @relation(fields: [achievementId], references: [id])
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+  @@map("app_user_achievements")
+}
+
+model PricingPlan {
+  id            String          @id @default(uuid())
+  name          String
+  description   String
+  price         Decimal         @db.Decimal(10, 2)
+  currency      String
+  interval      BillingInterval
+  features      Json
+  stripePriceId String?         @unique
+  isActive      Boolean         @default(true)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  subscriptions Subscription[]
+
+  @@map("app_pricing_plans")
+}
+
+model Subscription {
+  id                   String             @id @default(uuid())
+  userId               String
+  planId               String
+  status               SubscriptionStatus
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean            @default(false)
+  stripeSubscriptionId String?            @unique
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  plan                 PricingPlan        @relation(fields: [planId], references: [id])
+  user                 User               @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("app_subscriptions")
+}
+
+model FileUpload {
+  id           String   @id @default(uuid())
+  userId       String
+  filename     String
+  originalName String
+  mimeType     String
+  size         Int
+  url          String
+  thumbnailUrl String?
+  metadata     Json?
+  uploadedAt   DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("app_file_uploads")
+}
+
+enum AccountType {
+  CHECKING
+  SAVINGS
+  INVESTMENT
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+enum PaymentMethod {
+  CASH
+  DEBIT
+  CREDIT
+  TRANSFER
+  PIX
+  OTHER
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum BillStatus {
+  PENDING
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum RecurringFrequency {
+  DAILY
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+enum ReminderType {
+  CLOSING
+  PAYMENT
+  BILL
+  GOAL
+  CONTRACT
+  CUSTOM
+}
+
+enum ContractDifficulty {
+  BASIC
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum ContractStatus {
+  DRAFT
+  REVIEW
+  SIGNED
+  ACTIVE
+  EXPIRED
+  CANCELLED
+  ARCHIVED
+}
+
+enum GoalStatus {
+  ACTIVE
+  COMPLETED
+  PAUSED
+  CANCELLED
+}
+
+enum NotificationType {
+  REMINDER
+  ALERT
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+}
+
+enum BillingInterval {
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  TRIALING
+  EXPIRED
+}
