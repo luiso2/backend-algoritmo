@@ -6,7 +6,7 @@ export const validationSchema = Joi.object({
     .valid('development', 'production', 'test', 'staging')
     .default('development'),
   PORT: Joi.number().default(3001),
-  APP_URL: Joi.string().uri().required(),
+  APP_URL: Joi.string().uri().optional(), // Hecho opcional para Railway
 
   // Database
   DATABASE_URL: Joi.string().required(),
@@ -22,10 +22,11 @@ export const validationSchema = Joi.object({
   STRIPE_WEBHOOK_SECRET: Joi.string().optional(),
   STRIPE_PUBLISHABLE_KEY: Joi.string().optional(),
 
-  // Redis
-  REDIS_HOST: Joi.string().default('localhost'),
-  REDIS_PORT: Joi.number().default(6379),
+  // Redis - HECHO OPCIONAL
+  REDIS_HOST: Joi.string().optional().default('localhost'),
+  REDIS_PORT: Joi.number().optional().default(6379),
   REDIS_PASSWORD: Joi.string().optional().allow(''),
+  REDIS_URL: Joi.string().optional(),
 
   // AWS
   AWS_ACCESS_KEY_ID: Joi.string().optional(),
@@ -43,9 +44,9 @@ export const validationSchema = Joi.object({
   TWILIO_AUTH_TOKEN: Joi.string().optional(),
   TWILIO_PHONE_NUMBER: Joi.string().optional(),
 
-  // Directus
-  DIRECTUS_URL: Joi.string().uri().required(),
-  DIRECTUS_TOKEN: Joi.string().required(),
+  // Directus - HECHO OPCIONAL temporalmente
+  DIRECTUS_URL: Joi.string().uri().optional(),
+  DIRECTUS_TOKEN: Joi.string().optional(),
 
   // Security
   CORS_ORIGINS: Joi.string().default('http://localhost:5173'),
@@ -61,4 +62,8 @@ export const validationSchema = Joi.object({
 
   // External APIs
   EXCHANGE_RATES_API_KEY: Joi.string().optional(),
+  
+  // Railway specific
+  RAILWAY_ENVIRONMENT: Joi.string().optional(),
+  RAILWAY_STATIC_URL: Joi.string().optional(),
 });

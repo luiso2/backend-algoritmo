@@ -1,0 +1,74 @@
+# Variables de Entorno para Railway - Algoritmo Backend
+
+# Aplicación
+NODE_ENV=production
+PORT=3001
+APP_URL=https://algoritmo-backend.up.railway.app
+
+# Base de Datos PostgreSQL
+# Railway generará automáticamente DATABASE_URL cuando crees la base de datos
+# DATABASE_URL se configurará automáticamente
+
+# JWT - IMPORTANTE: Cambia estos valores por unos seguros
+JWT_SECRET=cambiar-por-una-clave-secreta-segura-de-al-menos-32-caracteres
+JWT_EXPIRES_IN=7d
+JWT_REFRESH_SECRET=cambiar-por-otra-clave-secreta-segura-de-al-menos-32-caracteres
+JWT_REFRESH_EXPIRES_IN=30d
+
+# Stripe (opcional - si usas pagos)
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
+STRIPE_PUBLISHABLE_KEY=
+
+# Redis (opcional - necesitarás agregar Redis como servicio en Railway)
+REDIS_HOST=
+REDIS_PORT=6379
+REDIS_PASSWORD=
+
+# AWS/Storage (opcional - para almacenamiento de archivos)
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_REGION=us-east-1
+AWS_BUCKET_NAME=
+
+# Email SendGrid (opcional - para envío de emails)
+SENDGRID_API_KEY=
+EMAIL_FROM=noreply@algoritmo.com
+EMAIL_FROM_NAME=Algoritmo Finanzas
+
+# SMS Twilio (opcional - para SMS)
+TWILIO_ACCOUNT_SID=
+TWILIO_AUTH_TOKEN=
+TWILIO_PHONE_NUMBER=
+
+# Directus (si lo usas)
+DIRECTUS_URL=https://algoritmo-algoritmo.dqyvuv.easypanel.host/
+DIRECTUS_TOKEN=AWabczhdvm5fiuHqM7I6N6kqwHQxcaFp
+
+# Seguridad
+CORS_ORIGINS=http://localhost:5173,http://localhost:3000,https://tu-frontend.vercel.app
+RATE_LIMIT_TTL=60
+RATE_LIMIT_LIMIT=100
+
+# OpenAI (opcional - para asistente IA)
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-4-turbo-preview
+
+# Encriptación - IMPORTANTE: Cambia esto por una clave de 32 caracteres
+ENCRYPTION_KEY=cambiar-por-clave-de-32-caracteres
+
+# Sentry (opcional - para tracking de errores)
+SENTRY_DSN=
+
+# Google OAuth (opcional)
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+
+# APIs de Datos Financieros (opcional)
+EXCHANGE_RATES_API_KEY=
+PLAID_CLIENT_ID=
+PLAID_SECRET=
+PLAID_ENV=sandbox
+
+# Scripts de inicio para Railway
+# Railway ejecutará automáticamente npm run start:prod

@@ -1,0 +1,41 @@
+# Variables de Entorno CRÍTICAS para Railway
+
+# Base de Datos - IMPORTANTE: Usa la referencia interna de Railway
+DATABASE_URL=${{postgres-db.DATABASE_URL}}
+
+# O si la referencia no funciona, usa:
+# DATABASE_URL=postgresql://algoritmo_user:algoritmo_secure_password_2024@postgres-db.railway.internal:5432/algoritmo_finanzas
+
+# JWT - IMPORTANTE: Cambia estos valores en producción
+JWT_SECRET=algoritmo-jwt-secret-key-2024-secure-production-change-this
+JWT_EXPIRES_IN=7d
+JWT_REFRESH_SECRET=algoritmo-refresh-secret-key-2024-secure-production-change-this
+JWT_REFRESH_EXPIRES_IN=30d
+
+# Aplicación
+NODE_ENV=production
+PORT=3001
+APP_URL=https://algoritmo-backend-production.up.railway.app
+
+# Directus
+DIRECTUS_URL=https://algoritmo-algoritmo.dqyvuv.easypanel.host/
+DIRECTUS_TOKEN=AWabczhdvm5fiuHqM7I6N6kqwHQxcaFp
+
+# Seguridad
+CORS_ORIGINS=http://localhost:5173,http://localhost:3000,https://algoritmo-backend-production.up.railway.app
+RATE_LIMIT_TTL=60
+RATE_LIMIT_LIMIT=100
+
+# Encriptación - IMPORTANTE: Cambia esto
+ENCRYPTION_KEY=algoritmo2024securekeyfor32chars
+
+# Email por defecto
+EMAIL_FROM=noreply@algoritmo.com
+EMAIL_FROM_NAME=Algoritmo Finanzas
+
+# Variables Opcionales (agrega si las necesitas)
+# SENDGRID_API_KEY=
+# STRIPE_SECRET_KEY=
+# OPENAI_API_KEY=
+# REDIS_HOST=
+# AWS_ACCESS_KEY_ID=

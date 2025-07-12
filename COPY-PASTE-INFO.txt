@@ -1,0 +1,18 @@
+# Backend Algoritmo - Información para Frontend
+
+## Backend URL
+https://algoritmo-backend-production.up.railway.app
+
+## Login Endpoint
+POST /auth/login
+Body: { "email": "user@example.com", "password": "password" }
+
+## Register Endpoint  
+POST /auth/register
+Body: { "email": "user@example.com", "password": "Pass123!", "firstName": "Name", "lastName": "Lastname" }
+
+## Headers para peticiones autenticadas
+Authorization: Bearer TOKEN_AQUI
+
+## Railway Dashboard
+https://railway.app/project/22a97d6a-8aff-42f5-97ee-a1118c5dbaa4
