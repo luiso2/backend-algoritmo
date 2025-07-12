@@ -1,118 +1,61 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { ConfigService } from '@nestjs/config';
-import * as compression from 'compression';
-import helmet from 'helmet';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  console.log('🚀 Iniciando Algoritmo Backend...');
+  console.log('🚀 INICIANDO ALGORITMO BACKEND - VERSION SIMPLE');
+  console.log('=================================================');
   
-  const app = await NestFactory.create(AppModule, {
-    logger: ['error', 'warn', 'debug', 'log', 'verbose'],
-  });
-
-  const configService = app.get(ConfigService);
-  const port = configService.get<number>('PORT', 3001);
-
   try {
-    // Security
-    app.use(helmet({
-      crossOriginEmbedderPolicy: false,
-      contentSecurityPolicy: {
-        directives: {
-          defaultSrc: [`'self'`],
-          styleSrc: [`'self'`, `'unsafe-inline'`],
-          scriptSrc: [`'self'`, `https: 'unsafe-inline'`],
-          imgSrc: [`'self'`, 'data:', 'https:'],
-        },
-      },
-    }) as any);
+    console.log('📦 Creando aplicación NestJS...');
+    const app = await NestFactory.create(AppModule, {
+      logger: ['error', 'warn', 'log'],
+    });
 
-    // Compression
-    app.use(compression());
-
-    // CORS - Más permisivo para Railway
-    const corsOrigins = configService.get<string>('CORS_ORIGINS', '*');
-    console.log('🌐 Configurando CORS para:', corsOrigins);
+    console.log('⚙️ Configurando aplicación...');
     
+    // Configuración mínima
+    const port = process.env.PORT || 3001;
+    
+    // CORS muy permisivo
     app.enableCors({
-      origin: corsOrigins === '*' ? true : corsOrigins.split(','),
+      origin: true,
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+      allowedHeaders: ['*'],
     });
 
     // Global prefix
     app.setGlobalPrefix('api');
 
-    // Global pipes
-    app.useGlobalPipes(
-      new ValidationPipe({
-        whitelist: true,
-        transform: true,
-        forbidNonWhitelisted: true,
-        transformOptions: {
-          enableImplicitConversion: true,
-        },
-      }),
-    );
+    // Pipes básicos
+    app.useGlobalPipes(new ValidationPipe({
+      transform: true,
+      whitelist: true,
+    }));
 
-    // Swagger documentation
-    const config = new DocumentBuilder()
-      .setTitle('Algoritmo Finanzas API')
-      .setDescription('API documentation for Algoritmo personal finance management platform')
-      .setVersion('1.0')
-      .addBearerAuth()
-      .addTag('auth', 'Authentication endpoints')
-      .addTag('users', 'User management')
-      .addTag('accounts', 'Bank accounts management')
-      .addTag('credit-cards', 'Credit cards management')
-      .addTag('transactions', 'Transactions management')
-      .addTag('bills', 'Bills and payments')
-      .addTag('contracts', 'Contract management')
-      .addTag('reports', 'Financial reports and analytics')
-      .addTag('ai', 'AI Assistant')
-      .addTag('notifications', 'Notifications management')
-      .addTag('health', 'Health check endpoints')
-      .build();
+    console.log('🌍 Variables de entorno:');
+    console.log(`   - NODE_ENV: ${process.env.NODE_ENV}`);
+    console.log(`   - PORT: ${port}`);
+    console.log(`   - DATABASE_URL: ${process.env.DATABASE_URL ? '✅ Configurada' : '❌ No configurada'}`);
+    console.log(`   - JWT_SECRET: ${process.env.JWT_SECRET ? '✅ Configurado' : '❌ No configurado'}`);
 
-    const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('api/docs', app, document, {
-      swaggerOptions: {
-        persistAuthorization: true,
-      },
-    });
-
-    // WebSockets configuration
-    app.enableShutdownHooks();
-
-    // ✅ CRÍTICO: Bind a todas las interfaces (0.0.0.0) para Railway
+    console.log('🚀 Iniciando servidor en puerto:', port);
+    
+    // CRÍTICO: Bind a 0.0.0.0 para Railway
     await app.listen(port, '0.0.0.0');
     
-    const environment = configService.get('NODE_ENV', 'development');
-    const appUrl = configService.get('APP_URL') || configService.get('RAILWAY_STATIC_URL') || `http://localhost:${port}`;
-    
-    console.log(`
-    ✅ Algoritmo Finanzas Backend INICIADO EXITOSAMENTE!
-    🌍 Environment: ${environment}
-    🔌 Port: ${port}
-    📡 API URL: ${appUrl}/api
-    📚 API Docs: ${appUrl}/api/docs
-    🏥 Health Check: ${appUrl}/api/health
-    💾 Database: ${configService.get('DATABASE_URL') ? '✅ Conectada' : '❌ No configurada'}
-    🔧 Redis: ${configService.get('REDIS_HOST') ? '✅ Configurado' : '⚠️ No configurado (usando memoria)'}
-    `);
+    console.log('✅ ¡SERVIDOR INICIADO EXITOSAMENTE!');
+    console.log(`📡 API disponible en: http://0.0.0.0:${port}/api`);
+    console.log(`🏥 Health check: http://0.0.0.0:${port}/api/health`);
+    console.log('=================================================');
 
   } catch (error) {
-    console.error('❌ Error durante la configuración:', error);
-    // No salir inmediatamente, permitir que la app intente iniciarse
+    console.error('❌ ERROR FATAL AL INICIAR:', error);
+    console.error('Stack trace:', error.stack);
+    console.error('=================================================');
+    process.exit(1);
   }
 }
 
-bootstrap().catch(error => {
-  console.error('❌ Error fatal al iniciar la aplicación:', error);
-  console.error('Stack trace:', error.stack);
-  process.exit(1);
-});
+bootstrap();
