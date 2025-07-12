@@ -81,13 +81,19 @@ async function bootstrap() {
   // WebSockets configuration
   app.enableShutdownHooks();
 
-  await app.listen(port);
+  // ✅ ARREGLO CRÍTICO: Especificar 0.0.0.0 para Railway
+  await app.listen(port, '0.0.0.0');
+  
   console.log(`
     🚀 Algoritmo Finanzas Backend is running!
     🌍 Environment: ${configService.get('NODE_ENV')}
-    📡 API URL: http://localhost:${port}/api
-    📚 API Docs: http://localhost:${port}/api/docs
+    📡 API URL: http://0.0.0.0:${port}/api
+    📚 API Docs: http://0.0.0.0:${port}/api/docs
+    🌐 Railway URL: https://algoritmo-backend-production.up.railway.app/api
   `);
 }
 
-bootstrap();
+bootstrap().catch(error => {
+  console.error('❌ Error starting application:', error);
+  process.exit(1);
+});
